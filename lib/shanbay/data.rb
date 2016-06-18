@@ -85,7 +85,7 @@ module Shanbay
 
     def content=(word)
       @content = word
-      @local_us_audio = ::Tempfile.new([content, '.mp3'])
+      @local_us_audio = ::Tempfile.new([content.to_s, '.mp3'])
     end
 
     def pre_download_us_audio

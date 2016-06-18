@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require 'shanbay'
+if ARGV.size > 0
+  api = Shanbay::Api.new
+  data = api.search ARGV[0]
+  ap "#{data.content}   [#{data.pron}]"
+  ap data.cn_definition
+  data.pre_download_us_audio
+  data.play_us_audio
+end
