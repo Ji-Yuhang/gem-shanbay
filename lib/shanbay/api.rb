@@ -1,11 +1,14 @@
+require "uri"
 require "open-uri"
 require "json"
+
 module Shanbay
   class Api
     def search(word)
-      getwordui = "https://api.shanbay.com/bdc/search/?word=#{word}"
-      open( getwordui) do |io|
-        jsonstr =  io.read
+      getwordui = "https://api.shanbay.com/bdc/search/?word=#{URI.escape(word)}"
+
+      open(URI(getwordui)) do |io|
+        jsonstr = io.read
         json = JSON.parse(jsonstr)
         data = json["data"]
         return parse_data data
@@ -13,7 +16,7 @@ module Shanbay
     end
 
     def parse_data(raw)
-      data = Data.new 
+      data = Data.new
       data.raw = raw
       data.cn_definition = raw["cn_definition"]
       data.en_definition = raw["en_definition"]
@@ -25,8 +28,5 @@ module Shanbay
       #data.pre_download_us_audio
       data
     end
-
-
   end
 end
-

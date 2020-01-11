@@ -1,10 +1,57 @@
 #!/usr/bin/env ruby
-require 'shanbay'
-if ARGV.size > 0
+require "rainbow/ext/string"
+
+require "shanbay"
+# require_relative "../lib/shanbay"
+
+def puts_shanbay_data(word)
+  return if word.nil?
   api = Shanbay::Api.new
-  data = api.search ARGV[0]
-  ap "#{data.content}   [#{data.pron}]"
-  ap data.cn_definition
-  data.pre_download_us_audio
-  data.play_us_audio
+  data = api.search word.chomp
+  if !data.content.nil?
+    lines = []
+    lines << "#{data.content}".color(:yellow) + " [#{data.pron}]".color(:magenta)
+    puts lines
+  end
+  if !data.cn_definition.nil?
+    cn_defn = data.cn_definition["defn"]
+    return if cn_defn.nil?
+    cn_defns = cn_defn.lines.map do |line|
+      type, defn = line.chomp.scan(/(\w*\.)([^\.]*)/)[0]
+      [type.color(:white), defn.color(:cyan)]
+    end
+    puts cn_defns.flatten
+  end
+
+  if !data.us_audio.nil?
+    data.pre_download_us_audio
+    data.play_us_audio
+  end
+end
+
+if ARGV.empty?
+  begin
+    loop do
+      print "> "
+      input = gets
+      return if input.nil?
+      input.chomp!
+      # 输入为空时继续循环
+      next if input == ""
+      puts_shanbay_data(input)
+    end
+  rescue SystemExit, Interrupt
+    puts "bye~"
+  end
+elsif %w{-h --help}.any? { |c| ARGV.include? c }
+  help = <<HELP
+shanbay: Translate tools in the command line
+  $ shanbay word
+  $ shanbay world peace
+  $ shanbay
+  > enter the loop mode, ctrl+c to exit
+HELP
+  puts help
+else
+  puts_shanbay_data(ARGV.join(" "))
 end
